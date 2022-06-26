@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.sid.bankingbackend.dtos.*;
 import org.sid.bankingbackend.exceptions.BalanceNotSufficientException;
 import org.sid.bankingbackend.exceptions.BankAccountNotFoundException;
+import org.sid.bankingbackend.exceptions.CustomerNotFoundException;
 import org.sid.bankingbackend.services.BankAccountService;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @AllArgsConstructor
+
 public class BankAccountRestAPI {
     private BankAccountService bankAccountService;
 
@@ -20,8 +22,11 @@ public class BankAccountRestAPI {
         return bankAccountService.getBankAccount(accountId);
     }
     @GetMapping("/accounts")
-    public List<BankAccountDTO> listAccounts(){
-        return bankAccountService.bankAccountList();
+    public ListAccountDTO listAccounts(
+            @RequestParam(name="page",defaultValue = "0") int page,
+            @RequestParam(name="size",defaultValue = "5")int size
+    ){
+        return bankAccountService.bankAccountList(page,size);
     }
     @GetMapping("/accounts/{accountId}/operations")
     public List<AccountOperationDTO> getHistory(@PathVariable String accountId){
@@ -51,5 +56,9 @@ public class BankAccountRestAPI {
                 transferRequestDTO.getAccountSource(),
                 transferRequestDTO.getAccountDestination(),
                 transferRequestDTO.getAmount());
+    }
+    @GetMapping("/customer-account/{customerId}")
+    public List<BankAccountDTO> listAccountsByCustomer(@PathVariable Long customerId) throws CustomerNotFoundException {
+        return bankAccountService.bankAccountListByCustomer(customerId);
     }
 }
